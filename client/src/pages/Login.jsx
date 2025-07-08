@@ -24,10 +24,14 @@ export default function Login() {
       });
 
       const token = res.data.token;
-      const user = res.data.user
+      const user = res.data.user;
 
-      login(token, user); // Zapis tokena i usera w kontekście
-      navigate("/dashboard"); // Przekierowanie
+      // Zapisujemy do localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      login(token, user); // aktualizacja kontekstu
+      navigate("/dashboard");
     } catch (err) {
       console.error(err);
       toast.error("Invalid email or password.", {

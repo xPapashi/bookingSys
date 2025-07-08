@@ -3,8 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 
 export default function Settings() {
-  const { logout } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  console.log(user);
+
 
   const handleLogout = () => {
     logout();
@@ -14,8 +17,6 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-[#ffedee] p-6 flex flex-col">
       <h1 className="text-2xl font-semibold text-[#000200] mb-6">Settings</h1>
-
-      {/* Inne ustawienia tu (np. zmiana hasła) */}
 
       <button
         onClick={handleLogout}

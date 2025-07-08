@@ -4,7 +4,10 @@ export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
-  const [user, setUser] = useState(null); // 🆕 dodajemy usera
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  }); // 🆕 dodajemy usera
 
   useEffect(() => {
     if (token) localStorage.setItem("token", token);
