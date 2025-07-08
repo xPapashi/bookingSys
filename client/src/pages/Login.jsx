@@ -1,24 +1,39 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "react-toastify";
+import { AuthContext } from "../AuthContext"; // Ścieżkę dostosuj do projektu
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
     try {
       const res = await axios.post("http://localhost:5000/api/auth/login", {
         email,
         password,
       });
-      localStorage.setItem("token", res.data.token);
-      navigate("/dashboard");
+
+      const token = res.data.token;
+      login(token); // Zapis tokena w kontekście
+      navigate("/dashboard"); // Przekierowanie
     } catch (err) {
-      alert("Login failed");
+      console.error(err);
+      toast.error("Invalid email or password.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,18 +67,23 @@ export default function Login() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-6 px-4 py-6 rounded-2xl border border-gray-300 bg-white text-[#383838]  focus:outline-none text-xl"
+          className="mb-6 px-4 py-6 rounded-2xl border border-gray-300 bg-white text-[#383838] focus:outline-none text-xl"
           required
         />
 
         <button
           type="submit"
-          className="bg-[#e79992] text-white font-normal text-2xl py-6 rounded-3xl hover:brightness-95 transition mb-6"
+          disabled={isLoading}
+          className={`text-white font-normal text-2xl py-6 rounded-3xl mb-2 transition ${
+            isLoading
+              ? "bg-[#e79992] opacity-60 cursor-not-allowed"
+              : "bg-[#e79992] hover:brightness-95"
+          }`}
         >
-          Sign In
+          {isLoading ? "Signing In..." : "Sign In"}
         </button>
 
-        <p className="flex flex-col text-lg text-[#cd6c60] text-center">
+        <p className="flex flex-col text-lg text-[#cd6c60] text-center mt-6">
           Don't have an account?{" "}
           <span
             className="font-semibold underline cursor-pointer"
