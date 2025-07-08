@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronRight } from "lucide-react";
+import { AuthContext } from "../AuthContext";
 
 // Mock dostępnych dat (YYYY-MM-DD)
 const availableDates = ["2025-07-10", "2025-07-12", "2025-07-17", "2025-07-22"];
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [name] = useState("Emma");
+  const { user } = useContext(AuthContext);
 
   const today = new Date();
   const year = today.getFullYear();
@@ -44,7 +45,9 @@ export default function Dashboard() {
         <button onClick={() => navigate(-1)} className="text-[#e79992] mb-6">
           <ArrowLeft size={30} strokeWidth={2.5} />
         </button>
-        <h1 className="text-xl font-semibold text-[#000200] mb-8">Hi, {name}!</h1>
+        <h1 className="text-xl font-semibold text-[#000200] mb-8">
+          Hi, {user?.firstName || "there"}!
+        </h1>
       </div>
 
       <p className="text-[#000200] text-3xl mb-8">Select an available time</p>

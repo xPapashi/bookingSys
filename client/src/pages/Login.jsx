@@ -24,7 +24,9 @@ export default function Login() {
       });
 
       const token = res.data.token;
-      login(token); // Zapis tokena w kontekście
+      const user = res.data.user
+
+      login(token, user); // Zapis tokena i usera w kontekście
       navigate("/dashboard"); // Przekierowanie
     } catch (err) {
       console.error(err);
