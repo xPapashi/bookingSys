@@ -16,6 +16,7 @@ import SelectTime from "./pages/SelectTime";
 import MyAppointments from "./pages/MyAppointments";
 import TreatmentHistory from "./pages/TreatmentHistory";
 import Settings from "./pages/Settings";
+import Admin from "./pages/Admin";
 
 import PrivateRoute from "./components/PrivateRoute";
 import PublicRoute from "./components/PublicRoute";
@@ -90,6 +91,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Settings />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute requireAdmin={true}>
+                <Admin />
               </PrivateRoute>
             }
           />
