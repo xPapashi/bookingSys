@@ -29,7 +29,8 @@ export default function SelectTime() {
         const res = await fetch("http://localhost:5000/api/availability");
         const data = await res.json();
         const day = data.find((d) => d.date === selectedDate);
-        setTimes(day?.times || []);
+        const sortedTimes = (day?.times || []).sort();
+        setTimes(sortedTimes);
       } catch (err) {
         console.error("Error fetching available times:", err);
       }
@@ -37,7 +38,9 @@ export default function SelectTime() {
 
     const fetchTaken = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/appointments/booked-times?date=${selectedDate}`);
+        const res = await fetch(
+          `http://localhost:5000/api/appointments/booked-times?date=${selectedDate}`
+        );
         const data = await res.json();
         setTakenTimes(data);
       } catch (err) {

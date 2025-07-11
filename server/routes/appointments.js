@@ -26,7 +26,7 @@ router.get("/my", authenticate, async (req, res) => {
   try {
     const appointments = await Appointment.find({ userId: req.user._id })
       .populate("service", "name") // Populate only service name
-      .sort({ date: -1, time: 1 }); // Optional: Sort by date descending, time ascending
+      .sort({ date: 1, time: 1 }); // Optional: Sort by date descending, time ascending
     res.json(appointments);
   } catch (err) {
     console.error("Error fetching user appointments:", err);
@@ -40,7 +40,7 @@ router.get("/", authenticate, requireAdmin, async (req, res) => {
     const appointments = await Appointment.find()
       .populate("userId", "firstName lastName")
       .populate("service", "name")
-      .sort({ date: -1, time: 1 }); // Optional: latest first
+      .sort({ date: 1, time: 1 }); // Optional: latest first
     res.json(appointments);
   } catch (err) {
     console.error("Error fetching admin appointments:", err);
