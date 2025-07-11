@@ -3,12 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { AuthContext } from "../AuthContext";
 
-const mockServices = [
-  { _id: "1", name: "Manicure" },
-  { _id: "2", name: "Pedicure" },
-  { _id: "3", name: "Eyebrow Tint" },
-];
-
 const formatDate = (input) => {
   if (!input) return "";
   const [year, month, day] = input.split("-");
@@ -20,46 +14,63 @@ export default function SelectTime() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const selectedDate = queryParams.get("date");
+  const { token } = useContext(AuthContext);
 
-  const [selectedService, setSelectedService] = useState(mockServices[0]._id);
+  const [times, setTimes] = useState([]);
+  const [takenTimes, setTakenTimes] = useState([]);
   const [selectedTime, setSelectedTime] = useState("");
-  const [availableTimes, setAvailableTimes] = useState([]);
-  const { token, user } = useContext(AuthContext); // get token
+  const [services, setServices] = useState([]);
+  const [selectedService, setSelectedService] = useState("");
 
+  // Fetch available slots for this date
   useEffect(() => {
-    if (!selectedDate) return;
-
     const fetchTimes = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/availability");
         const data = await res.json();
-        const match = data.find((d) => d.date === selectedDate);
-        const sortedTimes = match
-          ? [...match.times].sort((a, b) => {
-              return new Date(`1970-01-01T${a}`) - new Date(`1970-01-01T${b}`);
-            })
-          : [];
-        setAvailableTimes(sortedTimes);
+        const day = data.find((d) => d.date === selectedDate);
+        setTimes(day?.times || []);
       } catch (err) {
-        console.error("Error fetching times:", err);
-        setAvailableTimes([]);
+        console.error("Error fetching available times:", err);
+      }
+    };
+
+    const fetchTaken = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/appointments/booked-times?date=${selectedDate}`);
+        const data = await res.json();
+        setTakenTimes(data);
+      } catch (err) {
+        console.error("Error fetching booked times:", err);
+      }
+    };
+
+    const fetchServices = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/services");
+        const data = await res.json();
+        setServices(data);
+        setSelectedService(data[0]?._id || "");
+      } catch (err) {
+        console.error("Error fetching services:", err);
       }
     };
 
     fetchTimes();
+    fetchTaken();
+    fetchServices();
   }, [selectedDate]);
 
   const handleConfirm = async () => {
-    if (!selectedTime) {
-      alert("Please select a time.");
+    if (!selectedTime || !selectedService) {
+      alert("Please select a time and service.");
       return;
     }
 
-    const appointmentData = {
+    const appointment = {
       date: selectedDate,
       time: selectedTime,
-      service:
-        mockServices.find((s) => s._id === selectedService)?.name || "Service",
+      service: selectedService,
     };
 
     try {
@@ -69,20 +80,21 @@ export default function SelectTime() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(appointmentData),
+        body: JSON.stringify(appointment),
       });
 
       if (!res.ok) throw new Error("Booking failed");
+
       alert("Appointment booked!");
       navigate("/dashboard");
     } catch (err) {
-      alert("Error saving appointment.");
+      console.error("Booking error:", err);
+      alert("Booking failed. Please try again.");
     }
   };
 
   return (
     <div className="min-h-screen bg-[#ffedee] px-6 pt-8">
-      {/* Header */}
       <div className="flex items-center mb-6">
         <button onClick={() => navigate(-1)} className="text-[#e79992] mr-4">
           <ArrowLeft size={30} strokeWidth={2.5} />
@@ -102,34 +114,34 @@ export default function SelectTime() {
         onChange={(e) => setSelectedService(e.target.value)}
         className="mb-6 w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none"
       >
-        {mockServices.map((service) => (
+        {services.map((service) => (
           <option key={service._id} value={service._id}>
             {service.name}
           </option>
         ))}
       </select>
 
-      {availableTimes.length === 0 ? (
-        <p className="text-[#000200] text-center mb-8">
-          No time slots available.
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 mb-8">
-          {availableTimes.map((time) => (
+      <div className="grid grid-cols-2 gap-3 mb-8">
+        {times.map((time) => {
+          const isTaken = takenTimes.includes(time);
+          return (
             <button
               key={time}
-              onClick={() => setSelectedTime(time)}
+              onClick={() => !isTaken && setSelectedTime(time)}
+              disabled={isTaken}
               className={`py-3 rounded-xl border text-sm ${
-                selectedTime === time
+                isTaken
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : selectedTime === time
                   ? "bg-[#e79992] text-white"
                   : "bg-white text-[#000200] border-gray-300"
               }`}
             >
               {time}
             </button>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
 
       <button
         onClick={handleConfirm}

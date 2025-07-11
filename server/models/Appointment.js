@@ -14,10 +14,24 @@
 const mongoose = require("mongoose");
 
 const appointmentSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  date: { type: String, required: true },  // "YYYY-MM-DD"
-  time: { type: String, required: true },  // "HH:mm"
-  service: { type: String, required: true }, // Service name (can improve later)
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  date: {
+    type: String,
+    required: true,
+  },
+  time: {
+    type: String,
+    required: true,
+  },
+  service: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Service",
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("Appointment", appointmentSchema);

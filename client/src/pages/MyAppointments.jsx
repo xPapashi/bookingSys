@@ -74,7 +74,10 @@ export default function MyAppointments() {
                 <strong>Time:</strong> {appt.time}
               </p>
               <p>
-                <strong>Service:</strong> {appt.service}
+                <strong>Service:</strong>{" "}
+                {typeof appt.service === "object"
+                  ? appt.service.name
+                  : appt.service}
               </p>
               {user?.role === "admin" && appt.userId && (
                 <p>
