@@ -6,8 +6,8 @@ import { AuthContext } from "../AuthContext";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
-
   const [availableDates, setAvailableDates] = useState([]);
+
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
@@ -15,7 +15,6 @@ export default function Dashboard() {
   const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Sunday
   const monthName = today.toLocaleString("default", { month: "long" });
 
-  // 🔄 Fetch availability from backend
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
@@ -29,7 +28,6 @@ export default function Dashboard() {
     fetchAvailability();
   }, []);
 
-  // 📅 Build the calendar grid
   const generateCalendarGrid = () => {
     const daysArray = [];
     for (let i = 0; i < firstDayOfMonth; i++) daysArray.push(null);
@@ -105,14 +103,17 @@ export default function Dashboard() {
           onClick={() => navigate("/appointments")}
           className="bg-white text-[#000200] text-xl py-4 px-4 rounded-xl shadow flex justify-between items-center"
         >
-          My Appointments <ChevronRight className="text-[#e79992]" />
+          {user?.role === "admin" ? "Customer Appointments" : "My Appointments"}
+          <ChevronRight className="text-[#e79992]" />
         </button>
+
         <button
           onClick={() => navigate("/history")}
           className="bg-white text-[#000200] text-xl py-4 px-4 rounded-xl shadow flex justify-between items-center"
         >
           Treatment History <ChevronRight className="text-[#e79992]" />
         </button>
+
         <button
           onClick={() => navigate("/settings")}
           className="bg-white text-[#000200] text-xl py-4 px-4 rounded-xl shadow flex justify-between items-center"

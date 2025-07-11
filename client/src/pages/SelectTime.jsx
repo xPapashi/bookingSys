@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { AuthContext } from "../AuthContext";
 
 const mockServices = [
   { _id: "1", name: "Manicure" },
@@ -23,6 +24,7 @@ export default function SelectTime() {
   const [selectedService, setSelectedService] = useState(mockServices[0]._id);
   const [selectedTime, setSelectedTime] = useState("");
   const [availableTimes, setAvailableTimes] = useState([]);
+  const { token, user } = useContext(AuthContext); // get token
 
   useEffect(() => {
     if (!selectedDate) return;
@@ -47,7 +49,7 @@ export default function SelectTime() {
     fetchTimes();
   }, [selectedDate]);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedTime) {
       alert("Please select a time.");
       return;
@@ -56,12 +58,26 @@ export default function SelectTime() {
     const appointmentData = {
       date: selectedDate,
       time: selectedTime,
-      serviceId: selectedService,
+      service:
+        mockServices.find((s) => s._id === selectedService)?.name || "Service",
     };
 
-    console.log("Booking appointment:", appointmentData);
-    alert("Appointment booked!");
-    navigate("/dashboard");
+    try {
+      const res = await fetch("http://localhost:5000/api/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(appointmentData),
+      });
+
+      if (!res.ok) throw new Error("Booking failed");
+      alert("Appointment booked!");
+      navigate("/dashboard");
+    } catch (err) {
+      alert("Error saving appointment.");
+    }
   };
 
   return (
