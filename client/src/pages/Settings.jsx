@@ -1,12 +1,11 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ArrowLeft } from "lucide-react";
 import { AuthContext } from "../AuthContext";
 
 export default function Settings() {
   const { logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
-
 
   const handleLogout = () => {
     logout();
@@ -15,6 +14,15 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-[#ffedee] p-6 flex flex-col">
+      {/* Back button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-4 text-[#000200] flex items-center gap-2"
+      >
+        <ArrowLeft size={20} />
+        <span className="font-medium">Back</span>
+      </button>
+
       <h1 className="text-2xl font-semibold text-[#000200] mb-6">Settings</h1>
 
       {user?.role === "admin" && (

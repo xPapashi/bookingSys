@@ -1,17 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
-// Tymczasowe dane (mock)
 const mockServices = [
   { _id: "1", name: "Manicure" },
   { _id: "2", name: "Pedicure" },
-  { _id: "3", name: "Henna brwi" },
+  { _id: "3", name: "Eyebrow Tint" },
 ];
 
-const mockTimes = ["10:30 AM", "11:00 AM", "12:30 PM", "6:00 PM"];
-
-// Funkcja do formatu daty: YYYY-MM-DD → DD-MM-YY
 const formatDate = (input) => {
   if (!input) return "";
   const [year, month, day] = input.split("-");
@@ -26,6 +22,30 @@ export default function SelectTime() {
 
   const [selectedService, setSelectedService] = useState(mockServices[0]._id);
   const [selectedTime, setSelectedTime] = useState("");
+  const [availableTimes, setAvailableTimes] = useState([]);
+
+  useEffect(() => {
+    if (!selectedDate) return;
+
+    const fetchTimes = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/availability");
+        const data = await res.json();
+        const match = data.find((d) => d.date === selectedDate);
+        const sortedTimes = match
+          ? [...match.times].sort((a, b) => {
+              return new Date(`1970-01-01T${a}`) - new Date(`1970-01-01T${b}`);
+            })
+          : [];
+        setAvailableTimes(sortedTimes);
+      } catch (err) {
+        console.error("Error fetching times:", err);
+        setAvailableTimes([]);
+      }
+    };
+
+    fetchTimes();
+  }, [selectedDate]);
 
   const handleConfirm = () => {
     if (!selectedTime) {
@@ -40,8 +60,6 @@ export default function SelectTime() {
     };
 
     console.log("Booking appointment:", appointmentData);
-    // TODO: W przyszłości POST do backendu
-
     alert("Appointment booked!");
     navigate("/dashboard");
   };
@@ -58,12 +76,10 @@ export default function SelectTime() {
         </h1>
       </div>
 
-      {/* Data */}
       <p className="text-[#000200] mb-4">
         Date: <strong>{formatDate(selectedDate)}</strong>
       </p>
 
-      {/* Usługa */}
       <label className="text-[#000200] mb-2 block">Choose a service</label>
       <select
         value={selectedService}
@@ -77,24 +93,28 @@ export default function SelectTime() {
         ))}
       </select>
 
-      {/* Godziny */}
-      <div className="grid grid-cols-2 gap-3 mb-8">
-        {mockTimes.map((time) => (
-          <button
-            key={time}
-            onClick={() => setSelectedTime(time)}
-            className={`py-3 rounded-xl border text-sm ${
-              selectedTime === time
-                ? "bg-[#e79992] text-white"
-                : "bg-white text-[#000200] border-gray-300"
-            }`}
-          >
-            {time}
-          </button>
-        ))}
-      </div>
+      {availableTimes.length === 0 ? (
+        <p className="text-[#000200] text-center mb-8">
+          No time slots available.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 mb-8">
+          {availableTimes.map((time) => (
+            <button
+              key={time}
+              onClick={() => setSelectedTime(time)}
+              className={`py-3 rounded-xl border text-sm ${
+                selectedTime === time
+                  ? "bg-[#e79992] text-white"
+                  : "bg-white text-[#000200] border-gray-300"
+              }`}
+            >
+              {time}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {/* Potwierdzenie */}
       <button
         onClick={handleConfirm}
         className="w-full bg-[#e79992] text-white font-medium py-3 rounded-xl hover:brightness-95 transition"

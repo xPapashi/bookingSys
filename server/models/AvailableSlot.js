@@ -1,17 +1,8 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const AvailableSlotSchema = new mongoose.Schema({
-  date: {
-    type: Date,
-    required: true,
-    index: true
-  },
-  times: [
-    {
-      start: { type: String, required: true }, // e.g. "09:00"
-      end:   { type: String, required: true }  // e.g. "09:30"
-    }
-  ]
-}, { timestamps: true });
+const availabilitySchema = new mongoose.Schema({
+  date: { type: String, required: true },     // Format: YYYY-MM-DD
+  times: [{ type: String }]                   // Format: ["10:00", "11:00", ...]
+});
 
-module.exports = mongoose.model('AvailableSlot', AvailableSlotSchema);
+module.exports = mongoose.model("Availability", availabilitySchema);

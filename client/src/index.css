@@ -6,8 +6,8 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #b22929;
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #dcdcdc;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -34,7 +34,9 @@ h1 {
   line-height: 1.1;
 }
 
-
+input {
+  color: black;
+}
 
 @media (prefers-color-scheme: light) {
   :root {
